@@ -8,7 +8,7 @@ const apiRoutes = require('./routes/api')
 
 // Middleware
 app.use(cors())
-app.use(bodyParser.json())
+app.use(bodyParser.json()) //
 
 // Request logging middleware
 app.use((req, res, next) => {
