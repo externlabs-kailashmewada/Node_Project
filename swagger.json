@@ -1,0 +1,439 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "title": "Express Sequelize API Demo",
+    "description": "A Node.js REST API built with Express.js and Sequelize ORM using PostgreSQL",
+    "version": "1.0.0",
+    "contact": {
+      "name": "API Support",
+      "email": "support@example.com"
+    },
+    "license": {
+      "name": "ISC",
+      "url": "https://opensource.org/licenses/ISC"
+    }
+  },
+  "host": "localhost:3000",
+  "basePath": "/api",
+  "schemes": [
+    "http"
+  ],
+  "consumes": [
+    "application/json"
+  ],
+  "produces": [
+    "application/json"
+  ],
+  "paths": {
+    "/users": {
+      "post": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Create a new user",
+        "description": "Creates a new user with the provided name and email. Email must be unique.",
+        "parameters": [
+          {
+            "name": "user",
+            "in": "body",
+            "description": "User object to be created",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserCreate"
+            }
+          }
+        ],
+        "responses": {
+          "201": {
+            "description": "User created successfully",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "status": "error",
+                "message": "Name and email are required",
+                "statusCode": 400
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict - user already exists",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            },
+            "examples": {
+              "application/json": {
+                "status": "error",
+                "message": "User already exists",
+                "statusCode": 409
+              }
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get all users",
+        "description": "Retrieves a list of all users ordered by creation date (newest first).",
+        "responses": {
+          "200": {
+            "description": "Users retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/UsersListResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "get": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Get user by ID",
+        "description": "Retrieves a specific user by their ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "integer",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User retrieved successfully",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid ID",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Update user",
+        "description": "Updates an existing user's information. At least one field (name or email) must be provided.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "integer",
+            "example": 1
+          },
+          {
+            "name": "user",
+            "in": "body",
+            "description": "User object with fields to update",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/UserUpdate"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User updated successfully",
+            "schema": {
+              "$ref": "#/definitions/UserResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - validation error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "409": {
+            "description": "Conflict - email already taken",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Users"
+        ],
+        "summary": "Delete user",
+        "description": "Deletes a user by their ID.",
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "User ID",
+            "required": true,
+            "type": "integer",
+            "example": 1
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "User deleted successfully",
+            "schema": {
+              "$ref": "#/definitions/DeleteResponse"
+            }
+          },
+          "400": {
+            "description": "Bad request - invalid ID",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "404": {
+            "description": "User not found",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          },
+          "500": {
+            "description": "Internal server error",
+            "schema": {
+              "$ref": "#/definitions/ErrorResponse"
+            }
+          }
+        }
+      }
+    }
+  },
+  "definitions": {
+    "User": {
+      "type": "object",
+      "properties": {
+        "id": {
+          "type": "integer",
+          "description": "Unique identifier for the user",
+          "example": 1
+        },
+        "name": {
+          "type": "string",
+          "description": "User's full name",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "John Doe"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address (must be unique)",
+          "format": "email",
+          "example": "john@example.com"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user was created",
+          "example": "2024-01-01T00:00:00.000Z"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time",
+          "description": "Timestamp when the user was last updated",
+          "example": "2024-01-01T00:00:00.000Z"
+        }
+      },
+      "required": ["id", "name", "email", "createdAt", "updatedAt"]
+    },
+    "UserCreate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's full name",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "John Doe"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address (must be unique)",
+          "format": "email",
+          "example": "john@example.com"
+        }
+      },
+      "required": ["name", "email"]
+    },
+    "UserResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Response status",
+          "example": "success"
+        },
+        "message": {
+          "type": "string",
+          "description": "Response message",
+          "example": "User created successfully"
+        },
+        "data": {
+          "$ref": "#/definitions/User"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code",
+          "example": 201
+        }
+      },
+      "required": ["status", "message", "data", "statusCode"]
+    },
+    "UserUpdate": {
+      "type": "object",
+      "properties": {
+        "name": {
+          "type": "string",
+          "description": "User's full name",
+          "minLength": 2,
+          "maxLength": 100,
+          "example": "John Doe Updated"
+        },
+        "email": {
+          "type": "string",
+          "description": "User's email address (must be unique)",
+          "format": "email",
+          "example": "john.updated@example.com"
+        }
+      }
+    },
+    "UsersListResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Response status",
+          "example": "success"
+        },
+        "message": {
+          "type": "string",
+          "description": "Response message",
+          "example": "Users retrieved successfully"
+        },
+        "data": {
+          "type": "array",
+          "items": {
+            "$ref": "#/definitions/User"
+          }
+        },
+        "count": {
+          "type": "integer",
+          "description": "Number of users returned",
+          "example": 5
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code",
+          "example": 200
+        }
+      },
+      "required": ["status", "message", "data", "count", "statusCode"]
+    },
+    "DeleteResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Response status",
+          "example": "success"
+        },
+        "message": {
+          "type": "string",
+          "description": "Response message",
+          "example": "User deleted successfully"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code",
+          "example": 200
+        }
+      },
+      "required": ["status", "message", "statusCode"]
+    },
+    "ErrorResponse": {
+      "type": "object",
+      "properties": {
+        "status": {
+          "type": "string",
+          "description": "Error status",
+          "example": "error"
+        },
+        "message": {
+          "type": "string",
+          "description": "Error message",
+          "example": "Name and email are required"
+        },
+        "statusCode": {
+          "type": "integer",
+          "description": "HTTP status code",
+          "example": 400
+        }
+      },
+      "required": ["status", "message", "statusCode"]
+    }
+  },
+  "tags": [
+    {
+      "name": "Users",
+      "description": "User management operations"
+    }
+  ],
+  "externalDocs": {
+    "description": "Find more info about the API",
+    "url": "https://github.com/yourusername/demo"
+  }
+} 
